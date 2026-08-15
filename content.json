@@ -16,18 +16,9 @@
     ]
   },
   "stats": [
-    {
-      "number": 9000,
-      "label": "Power Level"
-    },
-    {
-      "number": 42,
-      "label": "Experiments Run"
-    },
-    {
-      "number": 100,
-      "label": "% Radioactive"
-    }
+    { "number": 9000, "label": "Power Level" },
+    { "number": 42, "label": "Experiments Run" },
+    { "number": 100, "label": "% Radioactive" }
   ],
   "hobbies": [
     {
@@ -62,7 +53,7 @@
   "contact": {
     "heading": "Transmit",
     "intro": "Signals can be transmitted directly to the control room. Response times may vary depending on reactor conditions and homework levels.",
-    "email": "elijah.a.lyons@gmail.com",
+    "email": "hello@elijahinfaversham.com",
     "buttonLabel": "Send Transmission",
     "enabled": true
   }

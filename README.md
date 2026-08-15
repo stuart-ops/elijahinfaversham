@@ -4,41 +4,53 @@ Elijah's personal site — Chernobyl control-room theme. No build step, no depen
 
 ## Files
 
-- `index.html` — the site. Layout and styling only; it reads its words from `content.json`.
+- `index.html` — the site. Layout only; it reads its words from `content.json`.
 - `content.json` — everything editable: text, numbers, hobby cards, photo captions, contact details.
-- `admin.html` — the editor. Open it at `/admin.html`, sign in, change things, press Publish.
-- `CNAME` — tells GitHub Pages the custom domain is `elijahinfaversham.com`
-- `photos/` — created automatically the first time a picture is uploaded.
+- `admin.html` — the editor, at `/admin.html`.
+- `auth.json` — created automatically during setup. Holds the GitHub key, encrypted.
+- `CNAME` — the custom domain.
+- `photos/` — created automatically on first upload.
 
 ## Editing the site
 
-Go to **elijahinfaversham.com/admin.html**.
+Go to **elijahinfaversham.com/admin.html**, type the passphrase, edit, press Publish.
 
-First visit asks for an access key from GitHub. To make one:
+Works from any computer. Nothing to carry, nothing to install.
 
-1. github.com → Settings → Developer settings → Personal access tokens → **Fine-grained tokens** → Generate new token
-2. Name it something like `elijah site editor`
-3. Set an expiry date (a new one is needed after it lapses)
-4. Repository access: **Only select repositories** → `elijahinfaversham`
-5. Permissions → Repository permissions → **Contents** → **Read and write**
-6. Generate, copy, paste into the editor
+### First-time setup (once, by an adult)
 
-The key is stored in that browser only. "Sign out" removes it. If it leaks, the worst anyone can do is edit this one website — delete the token on GitHub and make a new one.
+The editor will show the setup screen because `auth.json` doesn't exist yet.
 
-Publishing commits straight to `main`. GitHub Pages rebuilds in roughly a minute.
+1. Have the fine-grained GitHub token ready — `elijahinfaversham` selected under repository access, and Contents set to Read and write (via **Add permissions** → search `Contents`).
+2. Paste the token into the setup screen.
+3. Press **Generate a passphrase** — six random words, far stronger than anything memorable you'd invent.
+4. **Write it down somewhere safe.** It is stored nowhere and cannot be recovered.
+5. Press **Seal the reactor**.
 
-### Photos
+That commits `auth.json` to the repo, holding the token encrypted with the passphrase. After this the token is never needed again — only the phrase.
 
-Drop pictures into the archive section. They're resized to 1400px on the longest side and saved as JPEG, so phone photos don't bloat the repository. Each one takes a name and a comment that appears underneath it on the site.
+### If the passphrase is lost
+
+Open `/admin.html`, click **Set up a new passphrase**, and redo setup with the GitHub token. The old `auth.json` is overwritten.
+
+## How the lock works
+
+The token is encrypted with AES-256-GCM. The key comes from the passphrase via PBKDF2-SHA256 at 600,000 iterations, which makes each guess deliberately slow.
+
+`auth.json` is public — anyone can download it. Without the passphrase it is a block of noise, and at six generated words a brute-force attempt runs to tens of thousands of years. That safety depends entirely on using the generator rather than a chosen word: the editor refuses anything under 45 bits for that reason.
+
+Worst case if the passphrase ever leaked: someone edits this one website. The token cannot touch any other repository or account, and every change is reversible from git history.
 
 ## Deploy on GitHub Pages
 
-1. `index.html`, `content.json`, `admin.html` and `CNAME` on the `main` branch, repo root.
-2. Repo **Settings → Pages** → Source: *Deploy from a branch* → Branch: `main` / `/ (root)` → Save.
-3. Under **Custom domain**, enter `elijahinfaversham.com` and save.
-4. Once DNS resolves and the certificate is issued, tick **Enforce HTTPS**.
+1. `index.html`, `content.json`, `admin.html`, `CNAME` on `main`, repo root.
+2. **Settings → Pages** → Deploy from a branch → `main` / `/ (root)`.
+3. Custom domain: `elijahinfaversham.com`.
+4. Tick **Enforce HTTPS** once the certificate is issued.
 
-## DNS (at Namecheap)
+The repository must stay **public** — GitHub Pages does not serve private repos on the free plan.
+
+## DNS (Namecheap)
 
 | Type  | Host | Value |
 |-------|------|-------|
@@ -48,11 +60,10 @@ Drop pictures into the archive section. They're resized to 1400px on the longest
 | A     | @    | 185.199.111.153 |
 | CNAME | www  | stuart-ops.github.io. |
 
-Delete any URL Redirect Record on `@` — Namecheap adds one by default and it conflicts with the A records.
+Delete any URL Redirect Record on `@` — Namecheap adds one by default and it conflicts.
 
 ## Notes
 
-- The site respects `prefers-reduced-motion`: animations, particles and glitch effects switch off for anyone who has that set.
-- Geiger-counter sound is off by default, toggled bottom-right.
-- `admin.html` is publicly reachable but useless without a valid key. It carries `noindex` so search engines skip it.
-- Content is fetched at page load, so the words are not in the initial HTML. Fine for a personal site; worth revisiting if search ranking ever matters.
+- Photos are resized to 1400px and re-encoded as JPEG before upload, so phone pictures don't bloat the repo.
+- The site respects `prefers-reduced-motion`; the boot sequence and animations switch off.
+- `admin.html` carries `noindex` so search engines skip it.
