@@ -1,0 +1,965 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex, nofollow">
+<title>REACTOR CONTROL — Edit the site</title>
+<style>
+  /* ============================================================
+     ☢ CONTROL CONSOLE — the back room of elijahinfaversham.com
+     Edits content.json and uploads photos straight to GitHub.
+     ============================================================ */
+  :root {
+    --rad-green: #39ff14;
+    --rad-dim: #1a7a0a;
+    --rad-mid: #6bbf5a;
+    --hazard: #ffd400;
+    --orange: #ff6b00;
+    --red: #ff2222;
+    --bg: #050805;
+    --panel: #0b130b;
+    --panel-2: #0e180e;
+    --line: #1c3a17;
+    --mono: "Courier New", Courier, monospace;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--rad-mid);
+    font-family: var(--mono);
+    font-size: 14px;
+    line-height: 1.5;
+    padding-bottom: 120px;
+  }
+
+  ::selection { background: var(--hazard); color: #000; }
+  :focus-visible { outline: 2px solid var(--hazard); outline-offset: 2px; }
+
+  /* ---- Telemetry strip: the signature element ---- */
+  .telemetry {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background: #060b06;
+    border-bottom: 1px solid var(--line);
+    display: flex;
+    align-items: center;
+    gap: 18px;
+    padding: 10px 16px;
+    font-size: 11px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    flex-wrap: wrap;
+  }
+  .telemetry .lamp {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    color: var(--rad-dim);
+  }
+  .telemetry .lamp::before {
+    content: "";
+    width: 9px; height: 9px;
+    border-radius: 50%;
+    background: var(--rad-dim);
+    box-shadow: 0 0 8px currentColor;
+  }
+  .telemetry .lamp.on { color: var(--rad-green); }
+  .telemetry .lamp.on::before { background: var(--rad-green); }
+  .telemetry .lamp.warn { color: var(--hazard); }
+  .telemetry .lamp.warn::before { background: var(--hazard); }
+  .telemetry .lamp.err { color: var(--red); }
+  .telemetry .lamp.err::before { background: var(--red); }
+  .telemetry .spacer { flex: 1; }
+  .telemetry .msg { color: var(--rad-mid); letter-spacing: 1px; text-transform: none; }
+
+  .wrap { max-width: 880px; margin: 0 auto; padding: 0 16px; }
+
+  h1 {
+    font-size: 20px;
+    letter-spacing: 4px;
+    text-transform: uppercase;
+    color: var(--hazard);
+    margin: 34px 0 6px;
+  }
+  h1::before { content: "☢ "; color: var(--rad-green); }
+  .strap { color: var(--rad-dim); font-size: 12px; letter-spacing: 1px; margin-bottom: 30px; }
+
+  /* ---- Panels ---- */
+  fieldset {
+    border: 1px solid var(--line);
+    background: var(--panel);
+    padding: 20px;
+    margin-bottom: 22px;
+  }
+  legend {
+    color: var(--hazard);
+    font-size: 12px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    padding: 0 10px;
+  }
+  .hint {
+    color: var(--rad-dim);
+    font-size: 12px;
+    margin-bottom: 16px;
+    line-height: 1.6;
+  }
+
+  label {
+    display: block;
+    font-size: 11px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--rad-dim);
+    margin-bottom: 6px;
+  }
+  .field { margin-bottom: 16px; }
+
+  input[type="text"], input[type="number"], input[type="email"], textarea, select {
+    width: 100%;
+    background: #060b06;
+    border: 1px solid var(--line);
+    color: var(--rad-green);
+    font-family: var(--mono);
+    font-size: 14px;
+    padding: 10px 12px;
+    border-radius: 0;
+  }
+  textarea { resize: vertical; min-height: 90px; line-height: 1.6; }
+  input:focus, textarea:focus, select:focus {
+    border-color: var(--rad-green);
+    box-shadow: 0 0 12px rgba(57,255,20,0.18);
+  }
+
+  /* ---- Repeating rows ---- */
+  .row {
+    border: 1px solid var(--line);
+    background: var(--panel-2);
+    padding: 16px;
+    margin-bottom: 14px;
+    position: relative;
+  }
+  .row-head {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 14px;
+  }
+  .row-num {
+    font-size: 11px;
+    letter-spacing: 2px;
+    color: var(--hazard);
+    text-transform: uppercase;
+  }
+  .row-tools { margin-left: auto; display: flex; gap: 6px; }
+
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  .grid-icon { display: grid; grid-template-columns: 90px 1fr; gap: 14px; }
+  @media (max-width: 620px) {
+    .grid-2, .grid-icon { grid-template-columns: 1fr; }
+  }
+
+  /* ---- Buttons ---- */
+  button {
+    font-family: var(--mono);
+    font-size: 12px;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    padding: 9px 14px;
+    background: transparent;
+    color: var(--rad-mid);
+    border: 1px solid var(--line);
+    cursor: pointer;
+    transition: background 0.12s, color 0.12s, border-color 0.12s;
+  }
+  button:hover:not(:disabled) { border-color: var(--rad-green); color: var(--rad-green); }
+  button:disabled { opacity: 0.4; cursor: not-allowed; }
+  button.ghost-danger:hover:not(:disabled) { border-color: var(--red); color: var(--red); }
+  button.add {
+    width: 100%;
+    border-style: dashed;
+    padding: 12px;
+    margin-top: 4px;
+  }
+
+  /* ---- Save bar ---- */
+  .savebar {
+    position: fixed;
+    left: 0; right: 0; bottom: 0;
+    z-index: 100;
+    background: #060b06;
+    border-top: 1px solid var(--line);
+    padding: 12px 16px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    flex-wrap: wrap;
+  }
+  .savebar .status { font-size: 11px; letter-spacing: 1px; color: var(--rad-dim); flex: 1; min-width: 180px; }
+  .btn-primary {
+    background: var(--rad-green);
+    color: #000;
+    border: 1px solid var(--rad-green);
+    font-weight: bold;
+    padding: 12px 24px;
+    letter-spacing: 2px;
+  }
+  .btn-primary:hover:not(:disabled) {
+    background: var(--hazard);
+    border-color: var(--hazard);
+    color: #000;
+    box-shadow: 0 0 22px rgba(255,212,0,0.4);
+  }
+
+  /* ---- Photo tiles ---- */
+  .photo-row { display: grid; grid-template-columns: 130px 1fr; gap: 16px; }
+  @media (max-width: 620px) { .photo-row { grid-template-columns: 1fr; } }
+  .photo-thumb {
+    aspect-ratio: 4/3;
+    border: 1px solid var(--line);
+    background: #060b06;
+    display: flex; align-items: center; justify-content: center;
+    overflow: hidden;
+    color: var(--rad-dim);
+    font-size: 11px;
+  }
+  .photo-thumb img { width: 100%; height: 100%; object-fit: cover; }
+
+  .dropzone {
+    border: 1px dashed var(--line);
+    padding: 26px 20px;
+    text-align: center;
+    color: var(--rad-dim);
+    font-size: 12px;
+    letter-spacing: 1px;
+    cursor: pointer;
+    transition: border-color 0.12s, color 0.12s;
+  }
+  .dropzone:hover, .dropzone.over { border-color: var(--hazard); color: var(--hazard); }
+  .dropzone input { display: none; }
+
+  /* ---- Gate ---- */
+  .gate { max-width: 560px; margin: 60px auto; padding: 0 16px; }
+  .gate .note {
+    border-left: 2px solid var(--hazard);
+    padding: 12px 14px;
+    background: rgba(255,212,0,0.05);
+    color: var(--rad-mid);
+    font-size: 12.5px;
+    line-height: 1.7;
+    margin-bottom: 20px;
+  }
+  .gate .note a { color: var(--hazard); }
+  .gate ol { margin: 10px 0 0 18px; }
+  .gate li { margin-bottom: 6px; }
+  code {
+    background: #060b06;
+    border: 1px solid var(--line);
+    padding: 1px 5px;
+    color: var(--hazard);
+    font-size: 12.5px;
+  }
+  .err-box {
+    border: 1px solid var(--red);
+    background: rgba(255,34,34,0.07);
+    color: #ff8888;
+    padding: 12px 14px;
+    font-size: 12.5px;
+    margin-bottom: 16px;
+    line-height: 1.6;
+  }
+  .hidden { display: none !important; }
+
+  @media (prefers-reduced-motion: reduce) {
+    * { transition: none !important; animation: none !important; }
+  }
+</style>
+</head>
+<body>
+
+<div class="telemetry">
+  <span class="lamp" id="lamp-conn">LINK</span>
+  <span class="lamp" id="lamp-changes">SAVED</span>
+  <span class="spacer"></span>
+  <span class="msg" id="telemetry-msg">Standing by</span>
+</div>
+
+<!-- ============ GATE ============ -->
+<div class="gate" id="gate">
+  <h1>Reactor Control</h1>
+  <p class="strap">Sign in to edit elijahinfaversham.com</p>
+
+  <div class="err-box hidden" id="gate-error"></div>
+
+  <div class="note">
+    <strong>First time here?</strong> You need a key from GitHub. It only works on this one website, and you can delete it any time.
+    <ol>
+      <li>Go to <a href="https://github.com/settings/personal-access-tokens/new" target="_blank" rel="noopener">github.com token page</a></li>
+      <li>Token name: <code>elijah site editor</code></li>
+      <li>Expiration: pick a date (you'll make a new one after)</li>
+      <li>Repository access: <strong>Only select repositories</strong> → pick <code>elijahinfaversham</code></li>
+      <li>Permissions → Repository permissions → <strong>Contents</strong> → set to <strong>Read and write</strong></li>
+      <li>Click <strong>Generate token</strong>, copy it, paste below</li>
+    </ol>
+  </div>
+
+  <div class="field">
+    <label for="token">Access key</label>
+    <input type="text" id="token" placeholder="github_pat_..." autocomplete="off" spellcheck="false">
+  </div>
+  <div class="field">
+    <label><input type="checkbox" id="remember" checked style="width:auto;margin-right:8px"> Stay signed in on this device</label>
+  </div>
+  <button class="btn-primary" id="btn-connect">Connect</button>
+</div>
+
+<!-- ============ EDITOR ============ -->
+<div class="wrap hidden" id="editor">
+  <h1>Reactor Control</h1>
+  <p class="strap">Change anything, then press Publish. The site updates in about a minute.</p>
+
+  <div class="err-box hidden" id="editor-error"></div>
+
+  <fieldset>
+    <legend>Front page</legend>
+    <div class="field">
+      <label for="f-heroTitle">Big title</label>
+      <input type="text" id="f-heroTitle">
+    </div>
+    <div class="grid-2">
+      <div class="field">
+        <label for="f-heroStatus">Reactor status</label>
+        <input type="text" id="f-heroStatus">
+      </div>
+      <div class="field">
+        <label for="f-pageTitle">Browser tab title</label>
+        <input type="text" id="f-pageTitle">
+      </div>
+    </div>
+    <div class="field">
+      <label for="f-tapeText">Yellow scrolling tape</label>
+      <input type="text" id="f-tapeText">
+    </div>
+    <div class="field">
+      <label for="f-pageDescription">Description (shows in Google results)</label>
+      <textarea id="f-pageDescription" rows="2"></textarea>
+    </div>
+  </fieldset>
+
+  <fieldset>
+    <legend>About you</legend>
+    <p class="hint">One box per paragraph. Write it however you want — this is the bit people read first.</p>
+    <div class="field">
+      <label for="f-aboutHeading">Section heading</label>
+      <input type="text" id="f-aboutHeading">
+    </div>
+    <div id="about-list"></div>
+    <button class="add" id="add-para">+ Add paragraph</button>
+  </fieldset>
+
+  <fieldset>
+    <legend>Numbers</legend>
+    <p class="hint">Three counters that tick upward. Real or made up — your call.</p>
+    <div id="stats-list"></div>
+    <button class="add" id="add-stat">+ Add number</button>
+  </fieldset>
+
+  <fieldset>
+    <legend>Experiments</legend>
+    <p class="hint">Your hobbies and interests. Danger level is 0 to 5 and only affects the little bar.</p>
+    <div id="hobbies-list"></div>
+    <button class="add" id="add-hobby">+ Add experiment</button>
+  </fieldset>
+
+  <fieldset>
+    <legend>Specimen archive</legend>
+    <p class="hint">Your pictures. Add a photo, give it a name, and write something underneath it. Big photos get shrunk automatically so the site stays fast.</p>
+    <div class="field">
+      <label for="f-galleryHeading">Section heading</label>
+      <input type="text" id="f-galleryHeading">
+    </div>
+    <div id="gallery-list"></div>
+    <label class="dropzone" id="dropzone">
+      <input type="file" id="file-input" accept="image/*" multiple>
+      Drop pictures here, or click to choose
+    </label>
+  </fieldset>
+
+  <fieldset>
+    <legend>Contact</legend>
+    <div class="field">
+      <label><input type="checkbox" id="f-contactEnabled" style="width:auto;margin-right:8px"> Show the contact section</label>
+    </div>
+    <div class="field">
+      <label for="f-contactIntro">Wording above the button</label>
+      <textarea id="f-contactIntro" rows="2"></textarea>
+    </div>
+    <div class="grid-2">
+      <div class="field">
+        <label for="f-contactEmail">Email address</label>
+        <input type="email" id="f-contactEmail">
+      </div>
+      <div class="field">
+        <label for="f-contactButton">Button wording</label>
+        <input type="text" id="f-contactButton">
+      </div>
+    </div>
+  </fieldset>
+
+  <fieldset>
+    <legend>Session</legend>
+    <button id="btn-signout">Sign out</button>
+  </fieldset>
+</div>
+
+<div class="savebar hidden" id="savebar">
+  <span class="status" id="save-status">No changes yet</span>
+  <button id="btn-preview">View site</button>
+  <button class="btn-primary" id="btn-publish" disabled>Publish</button>
+</div>
+
+<script>
+// ============================================================
+// CONFIG
+// ============================================================
+const OWNER = "stuart-ops";
+const REPO  = "elijahinfaversham";
+const BRANCH = "main";
+const CONTENT_PATH = "content.json";
+const PHOTO_DIR = "photos";
+const MAX_EDGE = 1400;       // longest side of an uploaded photo, in pixels
+const JPEG_QUALITY = 0.82;
+
+// ============================================================
+// STATE
+// ============================================================
+let token = null;
+let content = null;
+let contentSha = null;
+let dirty = false;
+const pendingPhotos = [];    // { name, blob, dataUrl }
+
+const $ = (id) => document.getElementById(id);
+
+// ============================================================
+// Base64 helpers that survive emoji and binary
+// ============================================================
+function utf8ToB64(str) {
+  const bytes = new TextEncoder().encode(str);
+  let bin = "";
+  const CHUNK = 0x8000;
+  for (let i = 0; i < bytes.length; i += CHUNK) {
+    bin += String.fromCharCode.apply(null, bytes.subarray(i, i + CHUNK));
+  }
+  return btoa(bin);
+}
+function b64ToUtf8(b64) {
+  const bin = atob(b64.replace(/\s/g, ""));
+  const bytes = Uint8Array.from(bin, (c) => c.charCodeAt(0));
+  return new TextDecoder().decode(bytes);
+}
+function blobToB64(blob) {
+  return new Promise((resolve, reject) => {
+    const r = new FileReader();
+    r.onload = () => resolve(String(r.result).split(",")[1]);
+    r.onerror = () => reject(new Error("Could not read the file"));
+    r.readAsDataURL(blob);
+  });
+}
+
+// ============================================================
+// Telemetry strip
+// ============================================================
+function setLamp(id, state, text) {
+  const el = $(id);
+  el.className = "lamp" + (state ? " " + state : "");
+  if (text) el.textContent = text;
+}
+function say(msg) { $("telemetry-msg").textContent = msg; }
+
+function markDirty() {
+  dirty = true;
+  setLamp("lamp-changes", "warn", "UNSAVED");
+  $("btn-publish").disabled = false;
+  $("save-status").textContent = "You have changes that aren't published yet";
+}
+function markClean() {
+  dirty = false;
+  pendingPhotos.length = 0;
+  setLamp("lamp-changes", "on", "SAVED");
+  $("btn-publish").disabled = true;
+}
+
+// ============================================================
+// GitHub API
+// ============================================================
+async function gh(path, options = {}) {
+  const res = await fetch("https://api.github.com/repos/" + OWNER + "/" + REPO + "/" + path, {
+    ...options,
+    headers: {
+      "Authorization": "Bearer " + token,
+      "Accept": "application/vnd.github+json",
+      "X-GitHub-Api-Version": "2022-11-28",
+      ...(options.headers || {}),
+    },
+  });
+  if (!res.ok) {
+    let detail = "";
+    try { detail = (await res.json()).message || ""; } catch (e) {}
+    const err = new Error(detail || ("GitHub returned " + res.status));
+    err.status = res.status;
+    throw err;
+  }
+  return res.json();
+}
+
+async function loadContent() {
+  const data = await gh("contents/" + CONTENT_PATH + "?ref=" + BRANCH);
+  contentSha = data.sha;
+  return JSON.parse(b64ToUtf8(data.content));
+}
+
+async function putFile(path, b64, message, sha) {
+  const body = { message, content: b64, branch: BRANCH };
+  if (sha) body.sha = sha;
+  return gh("contents/" + path, { method: "PUT", body: JSON.stringify(body) });
+}
+
+// ============================================================
+// Image handling — shrink before upload
+// ============================================================
+function shrinkImage(file) {
+  return new Promise((resolve, reject) => {
+    const url = URL.createObjectURL(file);
+    const img = new Image();
+    img.onload = () => {
+      URL.revokeObjectURL(url);
+      let { width, height } = img;
+      const scale = Math.min(1, MAX_EDGE / Math.max(width, height));
+      width = Math.round(width * scale);
+      height = Math.round(height * scale);
+      const canvas = document.createElement("canvas");
+      canvas.width = width;
+      canvas.height = height;
+      const ctx = canvas.getContext("2d");
+      ctx.drawImage(img, 0, 0, width, height);
+      canvas.toBlob((blob) => {
+        if (!blob) return reject(new Error("Could not process that image"));
+        resolve({ blob, dataUrl: canvas.toDataURL("image/jpeg", 0.5) });
+      }, "image/jpeg", JPEG_QUALITY);
+    };
+    img.onerror = () => { URL.revokeObjectURL(url); reject(new Error("That file isn't a picture I can read")); };
+    img.src = url;
+  });
+}
+
+function safeName(original) {
+  const stamp = Date.now().toString(36);
+  const base = original.replace(/\.[^.]+$/, "").toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "").slice(0, 40) || "photo";
+  return base + "-" + stamp + ".jpg";
+}
+
+async function handleFiles(fileList) {
+  const files = Array.from(fileList).filter((f) => f.type.startsWith("image/"));
+  if (!files.length) return;
+  say("Processing " + files.length + " picture" + (files.length > 1 ? "s" : "") + "...");
+  for (const file of files) {
+    try {
+      const { blob, dataUrl } = await shrinkImage(file);
+      const name = safeName(file.name);
+      pendingPhotos.push({ name, blob, dataUrl });
+      content.gallery.items.push({
+        file: PHOTO_DIR + "/" + name,
+        label: "",
+        caption: "",
+        _pendingPreview: dataUrl,
+      });
+    } catch (err) {
+      showEditorError(file.name + ": " + err.message);
+    }
+  }
+  renderGallery();
+  markDirty();
+  say("Pictures ready — press Publish when you're done");
+}
+
+// ============================================================
+// Rendering the forms
+// ============================================================
+function bindField(id, get, set) {
+  const el = $(id);
+  const v = get();
+  if (el.type === "checkbox") el.checked = !!v; else el.value = v ?? "";
+  el.addEventListener("input", () => {
+    set(el.type === "checkbox" ? el.checked : el.value);
+    markDirty();
+  });
+  if (el.type === "checkbox") {
+    el.addEventListener("change", () => { set(el.checked); markDirty(); });
+  }
+}
+
+function toolButton(label, cls, onClick) {
+  const b = document.createElement("button");
+  b.type = "button";
+  b.textContent = label;
+  if (cls) b.className = cls;
+  b.addEventListener("click", onClick);
+  return b;
+}
+
+function moveItem(arr, from, to) {
+  if (to < 0 || to >= arr.length) return false;
+  const [item] = arr.splice(from, 1);
+  arr.splice(to, 0, item);
+  return true;
+}
+
+function labelled(labelText, input) {
+  const wrap = document.createElement("div");
+  wrap.className = "field";
+  const l = document.createElement("label");
+  l.textContent = labelText;
+  const id = "fld-" + Math.random().toString(36).slice(2, 9);
+  l.setAttribute("for", id);
+  input.id = id;
+  wrap.append(l, input);
+  return wrap;
+}
+
+function textInput(value, onInput, placeholder) {
+  const i = document.createElement("input");
+  i.type = "text";
+  i.value = value ?? "";
+  if (placeholder) i.placeholder = placeholder;
+  i.addEventListener("input", () => { onInput(i.value); markDirty(); });
+  return i;
+}
+
+function textArea(value, onInput, rows) {
+  const t = document.createElement("textarea");
+  t.value = value ?? "";
+  t.rows = rows || 3;
+  t.addEventListener("input", () => { onInput(t.value); markDirty(); });
+  return t;
+}
+
+function rowShell(numberLabel, onUp, onDown, onDelete) {
+  const row = document.createElement("div");
+  row.className = "row";
+  const head = document.createElement("div");
+  head.className = "row-head";
+  const num = document.createElement("span");
+  num.className = "row-num";
+  num.textContent = numberLabel;
+  const tools = document.createElement("div");
+  tools.className = "row-tools";
+  tools.append(
+    toolButton("↑", "", onUp),
+    toolButton("↓", "", onDown),
+    toolButton("Remove", "ghost-danger", onDelete)
+  );
+  head.append(num, tools);
+  row.appendChild(head);
+  return row;
+}
+
+// --- About paragraphs ---
+function renderAbout() {
+  const list = $("about-list");
+  list.innerHTML = "";
+  content.about.paragraphs.forEach((text, i) => {
+    const row = rowShell(
+      "Paragraph " + (i + 1),
+      () => { if (moveItem(content.about.paragraphs, i, i - 1)) { renderAbout(); markDirty(); } },
+      () => { if (moveItem(content.about.paragraphs, i, i + 1)) { renderAbout(); markDirty(); } },
+      () => { content.about.paragraphs.splice(i, 1); renderAbout(); markDirty(); }
+    );
+    row.appendChild(textArea(text, (v) => { content.about.paragraphs[i] = v; }, 4));
+    list.appendChild(row);
+  });
+}
+
+// --- Stats ---
+function renderStats() {
+  const list = $("stats-list");
+  list.innerHTML = "";
+  content.stats.forEach((stat, i) => {
+    const row = rowShell(
+      "Number " + (i + 1),
+      () => { if (moveItem(content.stats, i, i - 1)) { renderStats(); markDirty(); } },
+      () => { if (moveItem(content.stats, i, i + 1)) { renderStats(); markDirty(); } },
+      () => { content.stats.splice(i, 1); renderStats(); markDirty(); }
+    );
+    const grid = document.createElement("div");
+    grid.className = "grid-2";
+    const numInput = document.createElement("input");
+    numInput.type = "number";
+    numInput.value = stat.number ?? 0;
+    numInput.addEventListener("input", () => {
+      content.stats[i].number = Number(numInput.value) || 0;
+      markDirty();
+    });
+    grid.append(
+      labelled("The number", numInput),
+      labelled("What it means", textInput(stat.label, (v) => { content.stats[i].label = v; }, "e.g. Biscuits eaten"))
+    );
+    row.appendChild(grid);
+    list.appendChild(row);
+  });
+}
+
+// --- Hobbies ---
+function renderHobbies() {
+  const list = $("hobbies-list");
+  list.innerHTML = "";
+  content.hobbies.forEach((h, i) => {
+    const row = rowShell(
+      "Experiment " + (i + 1),
+      () => { if (moveItem(content.hobbies, i, i - 1)) { renderHobbies(); markDirty(); } },
+      () => { if (moveItem(content.hobbies, i, i + 1)) { renderHobbies(); markDirty(); } },
+      () => { content.hobbies.splice(i, 1); renderHobbies(); markDirty(); }
+    );
+    const top = document.createElement("div");
+    top.className = "grid-icon";
+    top.append(
+      labelled("Emoji", textInput(h.icon, (v) => { content.hobbies[i].icon = v; }, "🎮")),
+      labelled("Name", textInput(h.title, (v) => { content.hobbies[i].title = v; }, "Gaming Reactor"))
+    );
+    row.appendChild(top);
+    row.appendChild(labelled("Description", textArea(h.text, (v) => { content.hobbies[i].text = v; }, 3)));
+
+    const sel = document.createElement("select");
+    ["0 — Minimal", "1 — Low", "2 — Moderate", "3 — High", "4 — Severe", "5 — Critical"].forEach((t, n) => {
+      const o = document.createElement("option");
+      o.value = String(n);
+      o.textContent = t;
+      sel.appendChild(o);
+    });
+    sel.value = String(h.danger ?? 3);
+    sel.addEventListener("change", () => { content.hobbies[i].danger = Number(sel.value); markDirty(); });
+    row.appendChild(labelled("Danger level", sel));
+
+    list.appendChild(row);
+  });
+}
+
+// --- Gallery ---
+function renderGallery() {
+  const list = $("gallery-list");
+  list.innerHTML = "";
+  content.gallery.items.forEach((item, i) => {
+    const row = rowShell(
+      "Specimen " + String(i + 1).padStart(3, "0"),
+      () => { if (moveItem(content.gallery.items, i, i - 1)) { renderGallery(); markDirty(); } },
+      () => { if (moveItem(content.gallery.items, i, i + 1)) { renderGallery(); markDirty(); } },
+      () => {
+        const idx = pendingPhotos.findIndex((p) => PHOTO_DIR + "/" + p.name === item.file);
+        if (idx > -1) pendingPhotos.splice(idx, 1);
+        content.gallery.items.splice(i, 1);
+        renderGallery();
+        markDirty();
+      }
+    );
+    const grid = document.createElement("div");
+    grid.className = "photo-row";
+
+    const thumb = document.createElement("div");
+    thumb.className = "photo-thumb";
+    const img = document.createElement("img");
+    img.src = item._pendingPreview || (item.file + "?v=" + Date.now());
+    img.alt = "";
+    img.onerror = () => { thumb.textContent = "NO IMAGE"; };
+    thumb.appendChild(img);
+
+    const fields = document.createElement("div");
+    fields.append(
+      labelled("Name", textInput(item.label, (v) => { content.gallery.items[i].label = v; }, "What is it?")),
+      labelled("Comment underneath", textArea(item.caption, (v) => { content.gallery.items[i].caption = v; }, 2))
+    );
+
+    grid.append(thumb, fields);
+    row.appendChild(grid);
+    list.appendChild(row);
+  });
+}
+
+function renderAll() {
+  bindField("f-heroTitle", () => content.site.heroTitle, (v) => content.site.heroTitle = v);
+  bindField("f-heroStatus", () => content.site.heroStatus, (v) => content.site.heroStatus = v);
+  bindField("f-pageTitle", () => content.site.pageTitle, (v) => content.site.pageTitle = v);
+  bindField("f-tapeText", () => content.site.tapeText, (v) => content.site.tapeText = v);
+  bindField("f-pageDescription", () => content.site.pageDescription, (v) => content.site.pageDescription = v);
+  bindField("f-aboutHeading", () => content.about.heading, (v) => content.about.heading = v);
+  bindField("f-galleryHeading", () => content.gallery.heading, (v) => content.gallery.heading = v);
+  bindField("f-contactEnabled", () => content.contact.enabled !== false, (v) => content.contact.enabled = v);
+  bindField("f-contactIntro", () => content.contact.intro, (v) => content.contact.intro = v);
+  bindField("f-contactEmail", () => content.contact.email, (v) => content.contact.email = v);
+  bindField("f-contactButton", () => content.contact.buttonLabel, (v) => content.contact.buttonLabel = v);
+  renderAbout();
+  renderStats();
+  renderHobbies();
+  renderGallery();
+}
+
+// ============================================================
+// Errors
+// ============================================================
+function showGateError(msg) {
+  const box = $("gate-error");
+  box.textContent = msg;
+  box.classList.remove("hidden");
+}
+function showEditorError(msg) {
+  const box = $("editor-error");
+  box.textContent = msg;
+  box.classList.remove("hidden");
+  window.scrollTo({ top: 0, behavior: "smooth" });
+}
+function clearEditorError() { $("editor-error").classList.add("hidden"); }
+
+function friendlyError(err) {
+  if (err.status === 401) return "That key wasn't accepted. It may be wrong, or it may have expired — make a new one and try again.";
+  if (err.status === 403) return "GitHub refused that. Check the key has Contents set to Read and write.";
+  if (err.status === 404) return "Couldn't find content.json in the repository. It needs to be uploaded first.";
+  if (err.status === 409) return "The site changed somewhere else while you were editing. Reload the page and redo your changes.";
+  return err.message || "Something went wrong talking to GitHub.";
+}
+
+// ============================================================
+// Connect / publish
+// ============================================================
+async function connect(tok, remember) {
+  token = tok;
+  setLamp("lamp-conn", "warn", "LINKING");
+  say("Connecting...");
+  try {
+    content = await loadContent();
+    content.gallery = content.gallery || { heading: "Specimen Archive", items: [] };
+    content.gallery.items = content.gallery.items || [];
+    content.stats = content.stats || [];
+    content.hobbies = content.hobbies || [];
+    content.about = content.about || { heading: "Control Room", paragraphs: [] };
+    content.about.paragraphs = content.about.paragraphs || [];
+    content.site = content.site || {};
+    content.contact = content.contact || {};
+
+    if (remember) localStorage.setItem("eif_token", tok);
+    $("gate").classList.add("hidden");
+    $("editor").classList.remove("hidden");
+    $("savebar").classList.remove("hidden");
+    setLamp("lamp-conn", "on", "LINK");
+    markClean();
+    say("Connected");
+    renderAll();
+  } catch (err) {
+    token = null;
+    setLamp("lamp-conn", "err", "NO LINK");
+    say("Not connected");
+    showGateError(friendlyError(err));
+  }
+}
+
+async function publish() {
+  clearEditorError();
+  const btn = $("btn-publish");
+  btn.disabled = true;
+  setLamp("lamp-changes", "warn", "SENDING");
+
+  try {
+    // 1. Upload any new photos first, so the JSON never points at a missing file
+    for (let i = 0; i < pendingPhotos.length; i++) {
+      const p = pendingPhotos[i];
+      say("Uploading picture " + (i + 1) + " of " + pendingPhotos.length + "...");
+      const b64 = await blobToB64(p.blob);
+      await putFile(PHOTO_DIR + "/" + p.name, b64, "Add photo " + p.name);
+    }
+
+    // 2. Strip preview-only fields, then commit the content
+    say("Saving your changes...");
+    const clean = JSON.parse(JSON.stringify(content));
+    clean.gallery.items = clean.gallery.items.map(({ _pendingPreview, ...rest }) => rest);
+    const json = JSON.stringify(clean, null, 2) + "\n";
+    const result = await putFile(CONTENT_PATH, utf8ToB64(json), "Update site content", contentSha);
+    contentSha = result.content.sha;
+
+    content.gallery.items.forEach((it) => delete it._pendingPreview);
+    markClean();
+    renderGallery();
+    say("Published — the site updates in about a minute");
+    $("save-status").textContent = "Published at " + new Date().toLocaleTimeString();
+  } catch (err) {
+    setLamp("lamp-changes", "err", "FAILED");
+    btn.disabled = false;
+    showEditorError(friendlyError(err));
+    say("Publish failed");
+  }
+}
+
+// ============================================================
+// Wiring
+// ============================================================
+$("btn-connect").addEventListener("click", () => {
+  const tok = $("token").value.trim();
+  if (!tok) return showGateError("Paste your access key first.");
+  $("gate-error").classList.add("hidden");
+  connect(tok, $("remember").checked);
+});
+$("token").addEventListener("keydown", (e) => { if (e.key === "Enter") $("btn-connect").click(); });
+
+$("btn-signout").addEventListener("click", () => {
+  localStorage.removeItem("eif_token");
+  location.reload();
+});
+
+$("btn-preview").addEventListener("click", () => window.open("index.html", "_blank"));
+$("btn-publish").addEventListener("click", publish);
+
+$("add-para").addEventListener("click", () => {
+  content.about.paragraphs.push("");
+  renderAbout();
+  markDirty();
+});
+$("add-stat").addEventListener("click", () => {
+  content.stats.push({ number: 0, label: "" });
+  renderStats();
+  markDirty();
+});
+$("add-hobby").addEventListener("click", () => {
+  content.hobbies.push({ icon: "☢", title: "", text: "", danger: 3 });
+  renderHobbies();
+  markDirty();
+});
+
+const fileInput = $("file-input");
+fileInput.addEventListener("change", () => { handleFiles(fileInput.files); fileInput.value = ""; });
+
+const dz = $("dropzone");
+["dragenter", "dragover"].forEach((ev) =>
+  dz.addEventListener(ev, (e) => { e.preventDefault(); dz.classList.add("over"); })
+);
+["dragleave", "drop"].forEach((ev) =>
+  dz.addEventListener(ev, (e) => { e.preventDefault(); dz.classList.remove("over"); })
+);
+dz.addEventListener("drop", (e) => {
+  if (e.dataTransfer && e.dataTransfer.files) handleFiles(e.dataTransfer.files);
+});
+
+window.addEventListener("beforeunload", (e) => {
+  if (dirty) { e.preventDefault(); e.returnValue = ""; }
+});
+
+// Auto-connect if a key was saved
+const saved = localStorage.getItem("eif_token");
+if (saved) {
+  $("token").value = saved;
+  connect(saved, true);
+}
+</script>
+</body>
+</html>

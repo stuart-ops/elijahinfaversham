@@ -1,0 +1,60 @@
+{
+  "site": {
+    "heroTitle": "ELIJAH IN FAVERSHAM",
+    "heroStatus": "ONLINE",
+    "tapeText": "CAUTION — RADIOACTIVE PERSONALITY — DO NOT CROSS — WELCOME TO THE EXCLUSION ZONE — FAVERSHAM SECTOR 7",
+    "pageTitle": "ELIJAH IN FAVERSHAM ☢ REACTOR ONLINE",
+    "pageDescription": "Elijah's personal site — Faversham's most radioactive corner of the internet.",
+    "footerLine": "ELIJAHINFAVERSHAM.COM — BROADCASTING FROM THE FAVERSHAM EXCLUSION ZONE",
+    "footerWarning": "NO ACTUAL RADIATION WAS HARMED IN THE MAKING OF THIS WEBSITE"
+  },
+  "about": {
+    "heading": "Control Room",
+    "paragraphs": [
+      "Greetings, comrade. I am Elijah, chief experiment officer of the Faversham Exclusion Zone. This is my corner of the internet, where the geiger counters never stop clicking and the snacks are always glowing slightly.",
+      "By day I attend to my official duties. By night I conduct highly important experiments involving video games, questionable science, and finding out how many biscuits one person can eat before achieving critical mass."
+    ]
+  },
+  "stats": [
+    { "number": 9000, "label": "Power Level" },
+    { "number": 42, "label": "Experiments Run" },
+    { "number": 100, "label": "% Radioactive" }
+  ],
+  "hobbies": [
+    {
+      "icon": "🎮",
+      "title": "Gaming Reactor",
+      "text": "Extended containment sessions in virtual worlds. Current research: how late is too late on a school night. Results inconclusive.",
+      "danger": 3
+    },
+    {
+      "icon": "🧪",
+      "title": "Mad Science",
+      "text": "Kitchen-based chemistry, garden-based physics, and other experiments the authorities (parents) have not yet approved.",
+      "danger": 4
+    },
+    {
+      "icon": "⚽",
+      "title": "Field Operations",
+      "text": "Outdoor manoeuvres across the Faversham sector. High-speed pursuits, tactical ball deployment, occasional mud incidents.",
+      "danger": 2
+    },
+    {
+      "icon": "🎨",
+      "title": "Creative Fallout",
+      "text": "Drawing, building, inventing. Producing dangerous levels of creativity with a half-life of approximately one weekend.",
+      "danger": 3
+    }
+  ],
+  "gallery": {
+    "heading": "Specimen Archive",
+    "items": []
+  },
+  "contact": {
+    "heading": "Transmit",
+    "intro": "Signals can be transmitted directly to the control room. Response times may vary depending on reactor conditions and homework levels.",
+    "email": "hello@elijahinfaversham.com",
+    "buttonLabel": "Send Transmission",
+    "enabled": true
+  }
+}
