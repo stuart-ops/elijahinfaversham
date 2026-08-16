@@ -8,9 +8,8 @@
 <style>
   /* ============================================================
      ☢ ELIJAH IN FAVERSHAM — CHERNOBYL CONTROL ROOM THEME ☢
-     Content lives in content.json — edit it at /admin.html
-     Do not hand-edit the content in this file; it gets replaced
-     on load by whatever content.json says.
+     Single-file site. Search for "EDIT ME" to find every
+     placeholder that needs Elijah's real content.
      ============================================================ */
   :root {
     --rad-green: #39ff14;
@@ -213,8 +212,7 @@
     padding: 8px 12px;
     cursor: pointer;
   }
-  #geiger-toggle:hover,
-  #geiger-toggle:focus-visible {
+  #geiger-toggle:hover {
     background: var(--hazard-yellow);
     color: #000;
     box-shadow: 0 0 18px var(--hazard-yellow);
@@ -290,6 +288,34 @@
     box-shadow: 0 0 22px var(--crt-glow), 0 10px 30px rgba(0,0,0,0.6);
   }
   .card .card-icon { font-size: 34px; margin-bottom: 12px; display: block; }
+
+  /* Card that is also a link (the game) */
+  a.card-link {
+    display: block;
+    text-decoration: none;
+    color: inherit;
+    border-color: var(--rad-green);
+  }
+  a.card-link:hover, a.card-link:focus-visible {
+    outline: none;
+    border-color: var(--hazard-yellow);
+    box-shadow: 0 0 26px rgba(255, 212, 0, 0.28), 0 10px 30px rgba(0,0,0,0.6);
+  }
+  a.card-link .play-cta {
+    margin-top: 16px;
+    display: inline-block;
+    background: var(--rad-green);
+    color: #000;
+    font-weight: bold;
+    font-size: 12px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    padding: 9px 16px;
+  }
+  a.card-link:hover .play-cta, a.card-link:focus-visible .play-cta {
+    background: var(--hazard-yellow);
+    box-shadow: 0 0 18px var(--hazard-yellow);
+  }
   .card h3 {
     color: var(--hazard-yellow);
     font-size: 16px;
@@ -308,65 +334,33 @@
   /* ---- Specimen Archive (gallery) ---- */
   .gallery-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-    gap: 18px;
+    grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+    gap: 16px;
   }
   .specimen {
+    aspect-ratio: 4 / 3;
     border: 1px solid var(--rad-green-dim);
-    background: var(--bg-panel);
+    background:
+      linear-gradient(135deg, rgba(57,255,20,0.08), rgba(255,212,0,0.05)),
+      var(--bg-panel);
     display: flex;
     flex-direction: column;
-    transition: border-color 0.18s ease, box-shadow 0.18s ease, transform 0.18s ease;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    font-size: 13px;
+    color: var(--rad-green-dim);
+    letter-spacing: 1px;
+    transition: all 0.18s ease;
     overflow: hidden;
   }
   .specimen:hover {
     border-color: var(--hazard-yellow);
-    box-shadow: 0 0 20px rgba(255, 212, 0, 0.25);
-    transform: translateY(-4px);
-  }
-  .specimen .spec-frame {
-    aspect-ratio: 4 / 3;
-    background:
-      linear-gradient(135deg, rgba(57,255,20,0.08), rgba(255,212,0,0.05)),
-      #060a06;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    overflow: hidden;
-    border-bottom: 1px solid var(--rad-green-dim);
-  }
-  .specimen .spec-frame img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    display: block;
-  }
-  .specimen figcaption {
-    padding: 12px 14px 14px;
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
-  }
-  .specimen .spec-label {
-    font-size: 11px;
-    letter-spacing: 2px;
-    text-transform: uppercase;
     color: var(--hazard-yellow);
+    box-shadow: 0 0 20px rgba(255, 212, 0, 0.25);
   }
-  .specimen .spec-note {
-    font-size: 13px;
-    line-height: 1.55;
-    color: #a8e6a0;
-  }
-  .gallery-empty {
-    border: 1px dashed var(--rad-green-dim);
-    padding: 40px 24px;
-    text-align: center;
-    color: var(--rad-green-dim);
-    font-size: 13px;
-    letter-spacing: 2px;
-    grid-column: 1 / -1;
-  }
+  .specimen .spec-icon { font-size: 30px; }
+  .specimen img { width: 100%; height: 100%; object-fit: cover; }
 
   /* ---- Transmit (contact) ---- */
   .transmit-panel { text-align: center; }
@@ -386,8 +380,7 @@
     box-shadow: 0 0 20px var(--rad-green);
     transition: all 0.15s ease;
   }
-  .contact-btn:hover,
-  .contact-btn:focus-visible {
+  .contact-btn:hover {
     background: var(--hazard-yellow);
     box-shadow: 0 0 30px var(--hazard-yellow);
     transform: scale(1.04);
@@ -411,8 +404,6 @@
     pointer-events: none;
   }
   .hero, main, footer { position: relative; z-index: 2; }
-
-  :focus-visible { outline: 2px solid var(--hazard-yellow); outline-offset: 3px; }
 
   /* ---- Reduced motion: calm everything down ---- */
   @media (prefers-reduced-motion: reduce) {
@@ -439,237 +430,127 @@
 <!-- ======================= HERO ======================= -->
 <header class="hero">
   <span class="trefoil">☢</span>
-  <h1 class="glitch" id="hero-title" data-text="ELIJAH IN FAVERSHAM">ELIJAH IN FAVERSHAM</h1>
-  <p class="subtitle">REACTOR STATUS: <span style="color:var(--rad-green)" id="hero-status">ONLINE</span> <span class="blink">▓</span></p>
+  <h1 class="glitch" data-text="ELIJAH IN FAVERSHAM">ELIJAH IN FAVERSHAM</h1>
+  <p class="subtitle">REACTOR STATUS: <span style="color:var(--rad-green)">ONLINE</span> <span class="blink">▓</span></p>
   <p class="scroll-hint">▼ SCROLL TO INCREASE EXPOSURE ▼</p>
 </header>
 
 <!-- ======================= HAZARD TAPE ======================= -->
 <div class="hazard-tape" aria-hidden="true">
-  <div class="tape-inner" id="tape-inner"></div>
+  <div class="tape-inner">
+    ⚠ CAUTION — RADIOACTIVE PERSONALITY — DO NOT CROSS — ☢ — WELCOME TO THE EXCLUSION ZONE — FAVERSHAM SECTOR 7 — ⚠ CAUTION — RADIOACTIVE PERSONALITY — DO NOT CROSS — ☢ — WELCOME TO THE EXCLUSION ZONE — FAVERSHAM SECTOR 7 —&nbsp;
+  </div>
 </div>
 
 <main>
 
   <!-- ======================= CONTROL ROOM (ABOUT) ======================= -->
   <section id="control-room">
-    <h2 class="section-title" id="about-heading">Control Room</h2>
+    <h2 class="section-title">Control Room</h2>
     <div class="panel about-grid">
-      <div class="about-text" id="about-text"></div>
-      <div class="stats" id="stats"></div>
+      <div class="about-text">
+        <!-- EDIT ME: Replace this with Elijah's real about text -->
+        <p>&gt; INITIALIZING PERSONNEL FILE...</p>
+        <p>Greetings, comrade. I am <span class="highlight">Elijah</span>, chief experiment officer of the Faversham Exclusion Zone. This is my corner of the internet, where the geiger counters never stop clicking and the snacks are always glowing slightly.</p>
+        <p>By day I attend to my official duties. By night I conduct <span class="highlight">highly important experiments</span> involving video games, questionable science, and finding out how many biscuits one person can eat before achieving critical mass.</p>
+        <p>&gt; FILE STATUS: <span style="color:var(--alarm-red)">CLASSIFIED</span></p>
+      </div>
+      <div class="stats">
+        <!-- EDIT ME: Replace stat numbers/labels with real ones (age, pets, hobbies count, etc.) -->
+        <div class="stat"><div class="num" data-count="9000">0</div><div class="label">Power Level</div></div>
+        <div class="stat"><div class="num" data-count="42">0</div><div class="label">Experiments Run</div></div>
+        <div class="stat"><div class="num" data-count="100">0</div><div class="label">% Radioactive</div></div>
+      </div>
     </div>
   </section>
 
   <!-- ======================= EXPERIMENTS (HOBBIES) ======================= -->
   <section id="experiments">
     <h2 class="section-title">Experiments</h2>
-    <div class="card-grid" id="hobby-grid"></div>
+    <div class="card-grid">
+      <!-- EDIT ME: Replace these 4 cards with Elijah's real hobbies/interests -->
+      <a class="card card-link" href="game.html">
+        <span class="card-icon">🚲</span>
+        <h3>Gaming Reactor</h3>
+        <p>Takeaway Run — deliver curries and chips across Faversham on a bike. Dodge the seagulls, the dog walkers, and the bloke with the clipboard.</p>
+        <div class="danger-level">DANGER LEVEL: ███░░ HIGH</div>
+        <div class="play-cta">▶ Launch game</div>
+      </a>
+      <div class="card">
+        <span class="card-icon">🧪</span>
+        <h3>Mad Science</h3>
+        <p>Kitchen-based chemistry, garden-based physics, and other experiments the authorities (parents) have not yet approved.</p>
+        <div class="danger-level">DANGER LEVEL: ████░ SEVERE</div>
+      </div>
+      <div class="card">
+        <span class="card-icon">⚽</span>
+        <h3>Field Operations</h3>
+        <p>Outdoor manoeuvres across the Faversham sector. High-speed pursuits, tactical ball deployment, occasional mud incidents.</p>
+        <div class="danger-level">DANGER LEVEL: ██░░░ MODERATE</div>
+      </div>
+      <div class="card">
+        <span class="card-icon">🎨</span>
+        <h3>Creative Fallout</h3>
+        <p>Drawing, building, inventing. Producing dangerous levels of creativity with a half-life of approximately one weekend.</p>
+        <div class="danger-level">DANGER LEVEL: ███░░ HIGH</div>
+      </div>
+    </div>
   </section>
 
   <!-- ======================= SPECIMEN ARCHIVE (GALLERY) ======================= -->
   <section id="specimen-archive">
-    <h2 class="section-title" id="gallery-heading">Specimen Archive</h2>
-    <div class="gallery-grid" id="gallery-grid"></div>
+    <h2 class="section-title">Specimen Archive</h2>
+    <div class="gallery-grid">
+      <!-- EDIT ME: Replace these placeholders with real photos, e.g.:
+           <div class="specimen"><img src="photos/photo1.jpg" alt="Description"></div> -->
+      <div class="specimen"><span class="spec-icon">📸</span><span>SPECIMEN 001 — PENDING</span></div>
+      <div class="specimen"><span class="spec-icon">📸</span><span>SPECIMEN 002 — PENDING</span></div>
+      <div class="specimen"><span class="spec-icon">📸</span><span>SPECIMEN 003 — PENDING</span></div>
+      <div class="specimen"><span class="spec-icon">📸</span><span>SPECIMEN 004 — PENDING</span></div>
+      <div class="specimen"><span class="spec-icon">📸</span><span>SPECIMEN 005 — PENDING</span></div>
+      <div class="specimen"><span class="spec-icon">📸</span><span>SPECIMEN 006 — PENDING</span></div>
+    </div>
   </section>
 
   <!-- ======================= TRANSMIT (CONTACT) ======================= -->
   <section id="transmit">
-    <h2 class="section-title" id="contact-heading">Transmit</h2>
-    <div class="panel transmit-panel" id="transmit-panel"></div>
+    <h2 class="section-title">Transmit</h2>
+    <div class="panel transmit-panel">
+      <p>&gt; OPENING COMMUNICATION CHANNEL...</p>
+      <p>Signals can be transmitted directly to the control room. Response times may vary depending on reactor conditions and homework levels.</p>
+      <!-- EDIT ME: Replace with Elijah's real contact email -->
+      <a class="contact-btn" href="mailto:hello@elijahinfaversham.com">☢ Send Transmission</a>
+    </div>
   </section>
 
 </main>
 
 <!-- ======================= FOOTER ======================= -->
 <footer>
-  <p id="footer-line">☢ ELIJAHINFAVERSHAM.COM — BROADCASTING FROM THE FAVERSHAM EXCLUSION ZONE ☢</p>
-  <p class="warn" id="footer-warning">NO ACTUAL RADIATION WAS HARMED IN THE MAKING OF THIS WEBSITE</p>
+  <p>☢ ELIJAHINFAVERSHAM.COM — BROADCASTING FROM THE FAVERSHAM EXCLUSION ZONE ☢</p>
+  <p class="warn">NO ACTUAL RADIATION WAS HARMED IN THE MAKING OF THIS WEBSITE</p>
 </footer>
 
 <button id="geiger-toggle" aria-pressed="false">🔊 GEIGER: OFF</button>
 
 <script>
+  // ============================================================
+  // Reduced-motion check — used to disable JS-driven effects too
+  // ============================================================
   const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-
-  // Declared up here on purpose: updateMeter() and startCounters() both run
-  // before the sections below are reached, and `let` would trap them.
-  let geigerRate = 0.5;
-  let io = null;
-
-  // ============================================================
-  // Render the page from content.json
-  // ============================================================
-  const $ = (id) => document.getElementById(id);
-
-  function dangerBar(level) {
-    const n = Math.max(0, Math.min(5, Number(level) || 0));
-    const words = ["MINIMAL", "LOW", "MODERATE", "HIGH", "SEVERE", "CRITICAL"];
-    return "DANGER LEVEL: " + "█".repeat(n) + "░".repeat(5 - n) + " " + words[n];
-  }
-
-  function pad3(n) { return String(n).padStart(3, "0"); }
-
-  function render(c) {
-    // --- site chrome ---
-    if (c.site) {
-      if (c.site.pageTitle) document.title = c.site.pageTitle;
-      if (c.site.pageDescription) {
-        const m = document.querySelector('meta[name="description"]');
-        if (m) m.setAttribute("content", c.site.pageDescription);
-      }
-      if (c.site.heroTitle) {
-        const h = $("hero-title");
-        h.textContent = c.site.heroTitle;
-        h.setAttribute("data-text", c.site.heroTitle);
-      }
-      if (c.site.heroStatus) $("hero-status").textContent = c.site.heroStatus;
-      if (c.site.tapeText) {
-        const t = "⚠ " + c.site.tapeText + " — ☢ — ";
-        $("tape-inner").textContent = t + t;
-      }
-      if (c.site.footerLine) $("footer-line").textContent = "☢ " + c.site.footerLine + " ☢";
-      if (c.site.footerWarning) $("footer-warning").textContent = c.site.footerWarning;
-    }
-
-    // --- about ---
-    if (c.about) {
-      if (c.about.heading) $("about-heading").textContent = c.about.heading;
-      const box = $("about-text");
-      box.innerHTML = "";
-      const open = document.createElement("p");
-      open.textContent = "> INITIALIZING PERSONNEL FILE...";
-      box.appendChild(open);
-      (c.about.paragraphs || []).forEach((text) => {
-        const p = document.createElement("p");
-        p.textContent = text;
-        box.appendChild(p);
-      });
-      const close = document.createElement("p");
-      close.innerHTML = '&gt; FILE STATUS: <span style="color:var(--alarm-red)">CLASSIFIED</span>';
-      box.appendChild(close);
-    }
-
-    // --- stats ---
-    const statBox = $("stats");
-    statBox.innerHTML = "";
-    (c.stats || []).forEach((s) => {
-      const wrap = document.createElement("div");
-      wrap.className = "stat";
-      const num = document.createElement("div");
-      num.className = "num";
-      num.dataset.count = String(s.number ?? 0);
-      num.textContent = "0";
-      const lab = document.createElement("div");
-      lab.className = "label";
-      lab.textContent = s.label || "";
-      wrap.append(num, lab);
-      statBox.appendChild(wrap);
-    });
-
-    // --- hobbies ---
-    const grid = $("hobby-grid");
-    grid.innerHTML = "";
-    (c.hobbies || []).forEach((h) => {
-      const card = document.createElement("div");
-      card.className = "card";
-      const icon = document.createElement("span");
-      icon.className = "card-icon";
-      icon.textContent = h.icon || "☢";
-      const title = document.createElement("h3");
-      title.textContent = h.title || "";
-      const body = document.createElement("p");
-      body.textContent = h.text || "";
-      const danger = document.createElement("div");
-      danger.className = "danger-level";
-      danger.textContent = dangerBar(h.danger);
-      card.append(icon, title, body, danger);
-      grid.appendChild(card);
-    });
-
-    // --- gallery ---
-    if (c.gallery && c.gallery.heading) $("gallery-heading").textContent = c.gallery.heading;
-    const gal = $("gallery-grid");
-    gal.innerHTML = "";
-    const items = (c.gallery && c.gallery.items) || [];
-    if (!items.length) {
-      const empty = document.createElement("div");
-      empty.className = "gallery-empty";
-      empty.textContent = "ARCHIVE EMPTY — NO SPECIMENS LOGGED YET";
-      gal.appendChild(empty);
-    } else {
-      items.forEach((item, i) => {
-        const fig = document.createElement("figure");
-        fig.className = "specimen";
-        const frame = document.createElement("div");
-        frame.className = "spec-frame";
-        const img = document.createElement("img");
-        img.src = item.file || "";
-        img.alt = item.label || ("Specimen " + pad3(i + 1));
-        img.loading = "lazy";
-        frame.appendChild(img);
-        const cap = document.createElement("figcaption");
-        const lab = document.createElement("span");
-        lab.className = "spec-label";
-        lab.textContent = "SPECIMEN " + pad3(i + 1) + (item.label ? " — " + item.label : "");
-        cap.appendChild(lab);
-        if (item.caption) {
-          const note = document.createElement("span");
-          note.className = "spec-note";
-          note.textContent = item.caption;
-          cap.appendChild(note);
-        }
-        fig.append(frame, cap);
-        gal.appendChild(fig);
-      });
-    }
-
-    // --- contact ---
-    if (c.contact) {
-      if (c.contact.heading) $("contact-heading").textContent = c.contact.heading;
-      const panel = $("transmit-panel");
-      panel.innerHTML = "";
-      const open = document.createElement("p");
-      open.textContent = "> OPENING COMMUNICATION CHANNEL...";
-      panel.appendChild(open);
-      const intro = document.createElement("p");
-      intro.textContent = c.contact.intro || "";
-      panel.appendChild(intro);
-      if (c.contact.enabled !== false && c.contact.email) {
-        const a = document.createElement("a");
-        a.className = "contact-btn";
-        a.href = "mailto:" + c.contact.email;
-        a.textContent = "☢ " + (c.contact.buttonLabel || "Send Transmission");
-        panel.appendChild(a);
-      }
-      const section = document.getElementById("transmit");
-      section.style.display = (c.contact.enabled === false) ? "none" : "";
-    }
-
-    startCounters();
-  }
-
-  fetch("content.json?v=" + Date.now())
-    .then((r) => { if (!r.ok) throw new Error("content.json " + r.status); return r.json(); })
-    .then(render)
-    .catch((err) => {
-      console.error("Could not load content.json:", err);
-      const box = $("about-text");
-      if (box && !box.children.length) {
-        box.innerHTML = "<p>&gt; CONTENT FILE UNREADABLE — CHECK content.json</p>";
-      }
-    });
 
   // ============================================================
   // Scroll-driven radiation meter + readout
   // ============================================================
-  const meter = $("rad-meter");
-  const cpsEl = $("cps");
+  const meter = document.getElementById("rad-meter");
+  const cpsEl = document.getElementById("cps");
   function updateMeter() {
     const max = document.documentElement.scrollHeight - window.innerHeight;
     const pct = max > 0 ? (window.scrollY / max) : 0;
     meter.style.width = (pct * 100).toFixed(1) + "%";
     const cps = Math.round(12 + pct * 9975);
     cpsEl.textContent = String(cps).padStart(4, "0");
+    // Geiger clicks speed up as you scroll deeper
     geigerRate = 0.5 + pct * 14;
   }
   window.addEventListener("scroll", updateMeter, { passive: true });
@@ -677,10 +558,12 @@
 
   // ============================================================
   // Geiger counter sounds (WebAudio, no files needed)
+  // Off by default; toggled by the button.
   // ============================================================
   let audioCtx = null;
   let geigerOn = false;
-  const toggleBtn = $("geiger-toggle");
+  let geigerRate = 0.5; // clicks per second-ish
+  const toggleBtn = document.getElementById("geiger-toggle");
 
   function geigerClick() {
     if (!audioCtx) return;
@@ -699,6 +582,7 @@
   function geigerLoop() {
     if (!geigerOn) return;
     geigerClick();
+    // Poisson-ish random spacing so it sounds organic
     const delay = -Math.log(1 - Math.random()) / geigerRate * 1000;
     setTimeout(geigerLoop, Math.min(Math.max(delay, 30), 3000));
   }
@@ -714,32 +598,30 @@
   // ============================================================
   // Stat counters (count up when scrolled into view)
   // ============================================================
+  const nums = document.querySelectorAll(".stat .num");
   const seen = new WeakSet();
-  function startCounters() {
-    if (io) io.disconnect();
-    io = new IntersectionObserver((entries) => {
-      entries.forEach((e) => {
-        if (!e.isIntersecting || seen.has(e.target)) return;
-        seen.add(e.target);
-        const target = parseInt(e.target.dataset.count, 10) || 0;
-        if (reducedMotion) { e.target.textContent = target; return; }
-        const start = performance.now();
-        const dur = 1400;
-        function tick(now) {
-          const p = Math.min((now - start) / dur, 1);
-          e.target.textContent = Math.round(target * (1 - Math.pow(1 - p, 3)));
-          if (p < 1) requestAnimationFrame(tick);
-        }
-        requestAnimationFrame(tick);
-      });
-    }, { threshold: 0.4 });
-    document.querySelectorAll(".stat .num").forEach((n) => io.observe(n));
-  }
+  const io = new IntersectionObserver((entries) => {
+    entries.forEach((e) => {
+      if (!e.isIntersecting || seen.has(e.target)) return;
+      seen.add(e.target);
+      const target = parseInt(e.target.dataset.count, 10);
+      if (reducedMotion) { e.target.textContent = target; return; }
+      const start = performance.now();
+      const dur = 1400;
+      function tick(now) {
+        const p = Math.min((now - start) / dur, 1);
+        e.target.textContent = Math.round(target * (1 - Math.pow(1 - p, 3)));
+        if (p < 1) requestAnimationFrame(tick);
+      }
+      requestAnimationFrame(tick);
+    });
+  }, { threshold: 0.4 });
+  nums.forEach((n) => io.observe(n));
 
   // ============================================================
   // Floating radioactive particle field
   // ============================================================
-  const canvas = $("particles");
+  const canvas = document.getElementById("particles");
   if (!reducedMotion && canvas) {
     const ctx = canvas.getContext("2d");
     let w, h, parts;
