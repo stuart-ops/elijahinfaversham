@@ -48,7 +48,18 @@
   ],
   "gallery": {
     "heading": "Specimen Archive",
-    "items": []
+    "items": [
+      {
+        "file": "photos/specimen1.jpg",
+        "label": "SPECIMEN 001",
+        "caption": "Ash & Serena — Liberty City Sector 7"
+      },
+      {
+        "file": "photos/specimen2.jpg",
+        "label": "SPECIMEN 002",
+        "caption": "Ash & Serena — Red Square Winter Expedition"
+      }
+    ]
   },
   "contact": {
     "heading": "Transmit",
