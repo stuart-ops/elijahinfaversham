@@ -19,7 +19,7 @@
 <main id="gate">
   <h1>&#9762; Private screening</h1>
   <p>Enter the passphrase to watch.</p>
-  <input id="pw" type="password" placeholder="six words, spaces between" autocomplete="current-password" spellcheck="false" autocapitalize="none">
+  <input id="pw" type="password" placeholder="passphrase" autocomplete="current-password" spellcheck="false" autocapitalize="none">
   <button id="go">Unlock</button>
   <div id="msg"></div>
 </main>
@@ -29,7 +29,7 @@ async function unlock(){
   const msg = $("msg"); msg.textContent = "Unlocking... (a few seconds)";
   try{
     const phrase = $("pw").value.trim().toLowerCase().replace(/\s+/g," ");
-    const res = await fetch("video.enc?v=1"); if(!res.ok) throw new Error("fetch");
+    const res = await fetch("video.enc?v=2"); if(!res.ok) throw new Error("fetch");
     const buf = new Uint8Array(await res.arrayBuffer());
     const salt = buf.slice(0,16), iv = buf.slice(16,28), ct = buf.slice(28);
     const base = await crypto.subtle.importKey("raw", new TextEncoder().encode(phrase), "PBKDF2", false, ["deriveKey"]);
