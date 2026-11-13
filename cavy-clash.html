@@ -4,8 +4,8 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
 <meta name="robots" content="noindex, nofollow">
-<meta name="description" content="Cavy Clash: a cartoon guinea pig fighting tournament. 8 levels, special moves, no blood, no ads.">
-<title>Cavy Clash - The Great Guinea Pig Tournament</title>
+<meta name="description" content="Guinea Pigs Assemble! Guinea Pigs Attack! A cartoon guinea pig fighting tournament. 8 levels, special moves, no blood, no ads.">
+<title>Guinea Pigs Assemble! Guinea Pigs Attack!</title>
 <style>
   html,body{margin:0;height:100%;background:#1b1233;overflow:hidden;touch-action:none;
     user-select:none;-webkit-user-select:none;-webkit-touch-callout:none;-webkit-tap-highlight-color:transparent;
@@ -38,7 +38,7 @@
 (()=>{
 'use strict';
 /* =====================================================================
-   CAVY CLASH - The Great Guinea Pig Tournament
+   GUINEA PIGS ASSEMBLE! GUINEA PIGS ATTACK!
    Single file, no network calls, no tracking. Kid safe: cartoon bonks,
    dizzy stars, no blood, nobody gets hurt.
    ===================================================================== */
@@ -610,7 +610,7 @@ SCENES.title={cols:1,
   draw(){bgSimple(0,frameT);ui.btns=[];
     const bob=Math.sin(frameT*.06)*6;
     for(const[i,x,f]of[[0,150,1],[3,810,-1],[4,330,1],[7,630,-1]]){drawPig(ROSTER[i],{x,y:GROUND-24+Math.abs(Math.sin(frameT*.09+i))*-26,face:f,t:frameT+i*9,pose:'cheer',scale:1.05});}
-    g.save();g.translate(W/2,98+bob);g.rotate(-.03);txt('CAVY CLASH',0,0,98,'#ffd23f','center','#3a2630',16);g.restore();
+    g.save();g.translate(W/2,64+bob);g.rotate(-.03);txt('GUINEA PIGS ASSEMBLE!',0,0,60,'#ffd23f','center','#3a2630',12);txt('GUINEA PIGS ATTACK!',0,58,60,'#ff8a80','center','#3a2630',12);g.restore();
     txt('The Great Guinea Pig Tournament',W/2,168,28,'#fff','center','#3a2630',6);
     let y=214;const best=store.get('cavy_best',0);
     button('Start Tournament',W/2-170,y,340,54,()=>go('select',{mode:'tour',start:0}));y+=64;
