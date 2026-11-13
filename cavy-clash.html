@@ -609,9 +609,9 @@ const SCENES={};
 SCENES.title={cols:1,
   draw(){bgSimple(0,frameT);ui.btns=[];
     const bob=Math.sin(frameT*.06)*6;
-    for(const[i,x,f]of[[0,150,1],[3,810,-1],[4,330,1],[7,630,-1]]){drawPig(ROSTER[i],{x,y:GROUND-24+Math.abs(Math.sin(frameT*.09+i))*-26,face:f,t:frameT+i*9,pose:'cheer',scale:1.05});}
+    for(const[i,x,f]of[[0,95,1],[4,230,1],[7,730,-1],[3,865,-1]]){drawPig(ROSTER[i],{x,y:GROUND-24+Math.abs(Math.sin(frameT*.09+i))*-26,face:f,t:frameT+i*9,pose:'cheer',scale:1.05});}
     g.save();g.translate(W/2,64+bob);g.rotate(-.03);txt('GUINEA PIGS ASSEMBLE!',0,0,60,'#ffd23f','center','#3a2630',12);txt('GUINEA PIGS ATTACK!',0,58,60,'#ff8a80','center','#3a2630',12);g.restore();
-    txt('The Great Guinea Pig Tournament',W/2,168,28,'#fff','center','#3a2630',6);
+    txt('The Great Guinea Pig Tournament',W/2,176,28,'#fff','center','#3a2630',6);
     let y=214;const best=store.get('cavy_best',0);
     button('Start Tournament',W/2-170,y,340,54,()=>go('select',{mode:'tour',start:0}));y+=64;
     if(best>0&&best<8){button('Continue: Level '+(best+1),W/2-170,y,340,54,()=>go('select',{mode:'tour',start:best}),{col:'#c8f7c5'});y+=64;}
